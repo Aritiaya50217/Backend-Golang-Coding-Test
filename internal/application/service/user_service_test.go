@@ -196,6 +196,23 @@ func TestGetUsers_Success(t *testing.T) {
 
 }
 
+func BenchmarkGetUsers(b *testing.B) {
+	mockRepo := new(MockRepo)
+	userService := &service.UserService{Repo: mockRepo}
+
+	userFirst := "60b8d295f1a4e3e7d5a2b85f"
+	userSecond := "685d9aaaabac97c7040575f1"
+	userId1, _ := primitive.ObjectIDFromHex(userFirst)
+	userId2, _ := primitive.ObjectIDFromHex(userSecond)
+
+	users := []*domain.User{{ID: userId1}, {ID: userId2}}
+	mockRepo.On("GetUsers").Return(users, nil)
+
+	for i := 0; i < b.N; i++ {
+		_, _ = userService.GetUsers()
+	}
+}
+
 func TestUpdateUser_Success(t *testing.T) {
 	mockRepo := new(MockRepo)
 	service := &service.UserService{Repo: mockRepo}
