@@ -1,12 +1,14 @@
 package service_test
 
 import (
+	"log"
 	"testing"
 
 	service "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/application/service"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockRepo struct{ mock.Mock }
@@ -87,4 +89,22 @@ func TestCreateUser_Success(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 	mockHasher.AssertExpectations(t)
+}
+
+func TestCreateUser_DuplicateEmail(t *testing.T) {
+	mockRepo := new(MockRepo)
+	MockHasher := new(MockHasher)
+
+	service := &service.UserService{Repo: mockRepo, Hasher: MockHasher}
+	idString := "60b8d295f1a4e3e7d5a2b85f"
+	id, err := primitive.ObjectIDFromHex(idString)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mockRepo.On("GetUserByEmail", "test@gmail.com").Return(&domain.User{ID: id}, nil)
+
+	err = service.CreateUser(&domain.User{
+		Email: "test@gmail.com",
+	})
+	assert.Equal(t, err, "email already exists")
 }
