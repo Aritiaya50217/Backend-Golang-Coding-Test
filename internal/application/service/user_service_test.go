@@ -159,3 +159,26 @@ func TestGetUsers_Success(t *testing.T) {
 	assert.Len(t, result, 2)
 
 }
+
+func TestUpdateUser_Success(t *testing.T) {
+	mockRepo := new(MockRepo)
+	service := &service.UserService{Repo: mockRepo}
+
+	userID := "60b8d295f1a4e3e7d5a2b85f"
+	id, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		t.Fatalf("invalid ObjectID hex: %v", err)
+	}
+	mockUser := &domain.User{
+		ID:    id,
+		Name:  "John Doe",
+		Email: "john@example.com",
+	}
+
+	mockRepo.On("GetUserById", userID).Return(mockUser, nil)
+	mockRepo.On("GetUserByEmail", "new@example.com").Return(nil, nil)
+	mockRepo.On("UpdateUser", userID, "New Name", "new@example.com").Return(nil)
+
+	err = service.UpdateUser(userID, "New Name", "new@example.com")
+	assert.NoError(t, err)
+}
