@@ -5,6 +5,7 @@ import (
 
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	outbound "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -31,4 +32,13 @@ func (r *userMongoRepository) FindAll() ([]*domain.User, error) {
 	var users []*domain.User
 	err = cursor.All(context.Background(), &users)
 	return users, err
+}
+
+func (r *userMongoRepository) FindByEmail(email string) (*domain.User, error) {
+	var user domain.User
+	err := r.col.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	}
+	return &user, err
 }
