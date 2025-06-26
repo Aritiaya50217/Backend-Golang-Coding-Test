@@ -35,8 +35,14 @@ func main() {
 
 	userRepo := outbound_mongo.NewUserMongoRepository(collection)
 	hash := outbound_security.NewBcryptHasher()
-	uservice := service.NewUserService(userRepo, hash)
-	userHandler := http.NewUserHandler(uservice)
+	uerService := service.NewUserService(userRepo, hash)
+	userHandler := http.NewUserHandler(uerService)
+
+	// logger
+	cont, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	service.StartUserCountLogger(cont, userRepo)
 
 	// auth
 	tokenGen := security.NewJWTToKenGenarator(secret)

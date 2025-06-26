@@ -93,3 +93,7 @@ func (r *userMongoRepository) DeleteUser(id string) error {
 	}
 	return nil
 }
+
+func (r *userMongoRepository) CountUsers() (int64, error) {
+	return r.col.CountDocuments(context.TODO(), bson.M{})
+}

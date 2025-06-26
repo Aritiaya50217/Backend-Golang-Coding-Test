@@ -9,4 +9,5 @@ type UserRepository interface {
 	GetUserByEmail(email string) (*domain.User, error)
 	UpdateUser(id, name, email string) error
 	DeleteUser(id string) error
+	CountUsers() (int64, error)
 }
