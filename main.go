@@ -50,6 +50,7 @@ func main() {
 	// middleware
 	api := e.Group("/api")
 	api.Use(middleware.JWTMiddleware)
+	api.Use(middleware.LoggingMiddleware)
 	// router
 	userHandler.RegisterRoutes(api)
 	log.Fatal(e.Start(":8080"))
