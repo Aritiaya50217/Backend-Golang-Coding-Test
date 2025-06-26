@@ -9,23 +9,23 @@ import (
 	outbound "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
 )
 
-type userService struct {
-	repo   outbound.UserRepository
-	hasher outbound.PasswordHasher
+type UserService struct {
+	Repo   outbound.UserRepository
+	Hasher outbound.PasswordHasher
 }
 
 func NewUserService(r outbound.UserRepository, h outbound.PasswordHasher) inbound.UserService {
-	return &userService{repo: r, hasher: h}
+	return &UserService{Repo: r, Hasher: h}
 }
 
-func (s *userService) CreateUser(user *domain.User) error {
+func (s *UserService) CreateUser(user *domain.User) error {
 	// check email
-	existing, _ := s.repo.GetUserByEmail(user.Email)
+	existing, _ := s.Repo.GetUserByEmail(user.Email)
 	if existing != nil {
 		return errors.New("email already exists")
 	}
 	// hash
-	hashed, err := s.hasher.Hash(user.Password)
+	hashed, err := s.Hasher.Hash(user.Password)
 	if err != nil {
 		return err
 	}
@@ -34,29 +34,34 @@ func (s *userService) CreateUser(user *domain.User) error {
 	user.UpdatedAt = time.Now()
 
 	// save to repository
-	return s.repo.Save(user)
+	return s.Repo.Save(user)
 }
 
-func (s *userService) GetUser(id string) (*domain.User, error) {
-	return s.repo.GetUserById(id)
+func (s *UserService) GetUser(id string) (*domain.User, error) {
+	return s.Repo.GetUserById(id)
 }
 
-func (s *userService) GetUsers() ([]*domain.User, error) {
-	return s.repo.GetUsers()
+func (s *UserService) GetUsers() ([]*domain.User, error) {
+	return s.Repo.GetUsers()
 }
 
-func (s *userService) UpdateUser(id, name, email string) error {
-	user, err := s.repo.GetUserById(id)
+func (s *UserService) UpdateUser(id, name, email string) error {
+	user, err := s.Repo.GetUserById(id)
 	if err != nil {
 		return errors.New("user not found")
 	}
-	existing, _ := s.repo.GetUserByEmail(email)
+	existing, _ := s.Repo.GetUserByEmail(email)
 	if existing != nil && existing.ID != user.ID {
 		return errors.New("email already is use")
 	}
-	return s.repo.UpdateUser(id, name, email)
+	return s.Repo.UpdateUser(id, name, email)
 }
 
-func (s *userService) DeleteUser(id string) error {
-	return s.repo.DeleteUser(id)
+func (s *UserService) DeleteUser(id string) error {
+	return s.Repo.DeleteUser(id)
+}
+
+func (s *UserService) CountUsers() error {
+	_, err := s.Repo.CountUsers()
+	return err
 }
