@@ -267,3 +267,15 @@ func TestDeleteUser_Success(t *testing.T) {
 	err := service.DeleteUser(userID)
 	assert.NoError(t, err)
 }
+
+func BenchmarkDeleteUser(b *testing.B) {
+	mockRepo := new(MockRepo)
+	userService := &service.UserService{Repo: mockRepo}
+
+	userID := "60b8d295f1a4e3e7d5a2b85f"
+	mockRepo.On("DeleteUser", userID).Return(nil)
+
+	for i := 0; i < b.N; i++ {
+		_ = userService.DeleteUser(userID)
+	}
+}
