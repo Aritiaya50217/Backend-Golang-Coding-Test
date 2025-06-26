@@ -56,3 +56,7 @@ func (s *userService) UpdateUser(id, name, email string) error {
 	}
 	return s.repo.UpdateUser(id, name, email)
 }
+
+func (s *userService) DeleteUser(id string) error {
+	return s.repo.DeleteUser(id)
+}

@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
@@ -75,4 +76,20 @@ func (r *userMongoRepository) UpdateUser(id, name, email string) error {
 	}
 	_, err = r.col.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
 	return err
+}
+
+func (r *userMongoRepository) DeleteUser(id string) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	res, err := r.col.DeleteOne(context.Background(), bson.M{"_id": objID})
+	if err != nil {
+		return err
+	}
+
+	if res.DeletedCount == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
 }

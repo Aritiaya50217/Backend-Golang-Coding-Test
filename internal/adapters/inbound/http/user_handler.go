@@ -21,6 +21,7 @@ func (h *UserHandler) RegisterRoutes(e *echo.Group) {
 	e.GET("/user/:id", h.GetUser)
 	e.GET("/users", h.GetUsers)
 	e.PATCH("/user/:id", h.UpdateUser)
+	e.DELETE("/user/:id", h.DeleteUser)
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
@@ -68,4 +69,17 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "user updated"})
+}
+
+func (h *UserHandler) DeleteUser(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error ": "invalid input"})
+	}
+
+	err := h.service.DeleteUser(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{"message": "user deleted"})
 }

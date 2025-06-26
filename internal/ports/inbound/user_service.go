@@ -7,4 +7,5 @@ type UserService interface {
 	GetUser(id string) (*domain.User, error)
 	GetUsers() ([]*domain.User, error)
 	UpdateUser(id, name, email string) error
+	DeleteUser(id string) error
 }
