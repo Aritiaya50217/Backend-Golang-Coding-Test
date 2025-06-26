@@ -203,6 +203,28 @@ func TestUpdateUser_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func BenchmarkUpdateUser(b *testing.B) {
+	mockRepo := new(MockRepo)
+	userService := &service.UserService{Repo: mockRepo}
+
+	userID := "60b8d295f1a4e3e7d5a2b85f"
+	id, _ := primitive.ObjectIDFromHex(userID)
+
+	mockUser := &domain.User{
+		ID:    id,
+		Name:  "John Doe",
+		Email: "john@example.com",
+	}
+
+	mockRepo.On("GetUserById", userID).Return(mockUser, nil)
+	mockRepo.On("GetUserByEmail", mock.Anything).Return(nil, nil)
+	mockRepo.On("UpdateUser", userID, mock.Anything, mock.Anything).Return(nil)
+
+	for i := 0; i < b.N; i++ {
+		_ = userService.UpdateUser(userID, "New Name", "new@example.com")
+	}
+}
+
 func TestDeleteUser_Success(t *testing.T) {
 	mockRepo := new(MockRepo)
 	service := &service.UserService{Repo: mockRepo}
