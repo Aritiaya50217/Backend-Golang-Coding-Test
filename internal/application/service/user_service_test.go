@@ -134,3 +134,28 @@ func TestGetUserByID_Success(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 }
+
+func TestGetUsers_Success(t *testing.T) {
+	mockRepo := new(MockRepo)
+	service := &service.UserService{Repo: mockRepo}
+
+	userFirst := "60b8d295f1a4e3e7d5a2b85f"
+	userSecond := "685d9aaaabac97c7040575f1"
+	userId1, err := primitive.ObjectIDFromHex(userFirst)
+	if err != nil {
+		t.Fatalf("invalid ObjectID hex: %v", err)
+	}
+
+	userId2, err := primitive.ObjectIDFromHex(userSecond)
+	if err != nil {
+		t.Fatalf("invalid ObjectID hex: %v", err)
+	}
+
+	users := []*domain.User{{ID: userId1}, {ID: userId2}}
+	mockRepo.On("GetUsers").Return(users, nil)
+
+	result, err := service.GetUsers()
+	assert.NoError(t, err)
+	assert.Len(t, result, 2)
+
+}
