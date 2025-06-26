@@ -155,6 +155,22 @@ func TestGetUserByID_Success(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
+func BenchmarkGetUserById(b *testing.B) {
+	mockRepo := new(MockRepo)
+	userService := &service.UserService{Repo: mockRepo}
+	userID := "60b8d295f1a4e3e7d5a2b85f"
+	id, _ := primitive.ObjectIDFromHex(userID)
+	user := &domain.User{
+		ID: id,
+	}
+
+	mockRepo.On("GetUserById", userID).Return(user, nil)
+
+	for i := 0; i < b.N; i++ {
+		_, _ = userService.GetUser(userID)
+	}
+}
+
 func TestGetUsers_Success(t *testing.T) {
 	mockRepo := new(MockRepo)
 	service := &service.UserService{Repo: mockRepo}
