@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/config"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/inbound/http"
 	outbound_mongo "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/mongo"
+	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
 	outbound_security "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/application/service"
 	"github.com/labstack/echo/v4"
@@ -24,12 +26,24 @@ func main() {
 	}
 	collection := client.Database("my_data").Collection("users")
 
-	repo := outbound_mongo.NewUserMongoRepository(collection)
+	// secret key
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET is required")
+	}
+
+	userRepo := outbound_mongo.NewUserMongoRepository(collection)
 	hash := outbound_security.NewBcryptHasher()
-	svc := service.NewUserService(repo, hash)
-	handler := http.NewUserHandler(svc)
+	uservice := service.NewUserService(userRepo, hash)
+	userHandler := http.NewUserHandler(uservice)
+
+	// auth
+	tokenGen := security.NewJWTToKenGenarator(secret)
+	authService := service.NewAuthService(userRepo, hash, tokenGen)
+	authHandler := http.NewAuthHandler(authService)
 
 	e := echo.New()
-	handler.RegisterRoutes(e)
+	userHandler.RegisterRoutes(e)
+	authHandler.RegisterRoutes(e)
 	log.Fatal(e.Start(":8080"))
 }

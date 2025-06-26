@@ -17,6 +17,7 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_TIMEOUT_SEC=10
+      - JWT_SECRET=my-secret-key
     depends_on:
       - mongo
 volumes:
