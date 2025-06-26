@@ -20,7 +20,7 @@ func NewUserService(r outbound.UserRepository, h outbound.PasswordHasher) inboun
 
 func (s *userService) CreateUser(user *domain.User) error {
 	// check email
-	existing, _ := s.repo.FindByEmail(user.Email)
+	existing, _ := s.repo.GetUserByEmail(user.Email)
 	if existing != nil {
 		return errors.New("email already exists")
 	}
@@ -35,6 +35,10 @@ func (s *userService) CreateUser(user *domain.User) error {
 	return s.repo.Save(user)
 }
 
+func (s *userService) GetUser(id string) (*domain.User, error) {
+	return s.repo.GetUserById(id)
+}
+
 func (s *userService) GetUsers() ([]*domain.User, error) {
-	return s.repo.FindAll()
+	return s.repo.GetUsers()
 }

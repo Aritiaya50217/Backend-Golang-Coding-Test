@@ -6,6 +6,7 @@ import (
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	outbound "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -22,7 +23,7 @@ func (r *userMongoRepository) Save(user *domain.User) error {
 	return err
 }
 
-func (r *userMongoRepository) FindAll() ([]*domain.User, error) {
+func (r *userMongoRepository) GetUsers() ([]*domain.User, error) {
 	cursor, err := r.col.Find(context.Background(), map[string]interface{}{})
 	if err != nil {
 		return nil, err
@@ -34,11 +35,26 @@ func (r *userMongoRepository) FindAll() ([]*domain.User, error) {
 	return users, err
 }
 
-func (r *userMongoRepository) FindByEmail(email string) (*domain.User, error) {
+func (r *userMongoRepository) GetUserByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	err := r.col.FindOne(context.Background(), bson.M{"email": email}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	}
 	return &user, err
+}
+
+func (r *userMongoRepository) GetUserById(id string) (*domain.User, error) {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var user domain.User
+	if err := r.col.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user); err != nil {
+		return nil, err
+	}
+
+	user.ID = objID
+	return &user, nil
 }

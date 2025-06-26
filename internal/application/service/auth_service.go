@@ -22,7 +22,7 @@ func NewAuthService(repo outbound.UserRepository, hasher outbound.PasswordHasher
 }
 
 func (s *authService) Login(email, password string) (string, error) {
-	user, err := s.userRepo.FindByEmail(email)
+	user, err := s.userRepo.GetUserByEmail(email)
 	if err != nil || user == nil {
 		return "", errors.New("invalid email or password")
 	}
