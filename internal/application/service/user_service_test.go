@@ -91,6 +91,26 @@ func TestCreateUser_Success(t *testing.T) {
 	mockHasher.AssertExpectations(t)
 }
 
+func BenchmarkCreateUser(b *testing.B) {
+	mockRepo := new(MockRepo)
+	mockHasher := new(MockHasher)
+	userService := &service.UserService{Repo: mockRepo, Hasher: mockHasher}
+
+	mockRepo.On("GetUserByEmail", mock.Anything).Return(nil, nil)
+	mockHasher.On("Hash", mock.Anything).Return("hashed-pass", nil)
+	mockRepo.On("Save", mock.AnythingOfType("*domain.User")).Return(nil)
+
+	for i := 0; i < b.N; i++ {
+		user := &domain.User{
+			Name:     "Test Create User",
+			Email:    "test@gmail.com",
+			Password: "test1111",
+		}
+		_ = userService.CreateUser(user)
+	}
+
+}
+
 func TestCreateUser_DuplicateEmail(t *testing.T) {
 	mockRepo := new(MockRepo)
 	MockHasher := new(MockHasher)
