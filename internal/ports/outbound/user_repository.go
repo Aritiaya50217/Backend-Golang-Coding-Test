@@ -7,4 +7,5 @@ type UserRepository interface {
 	GetUserById(id string) (*domain.User, error)
 	GetUsers() ([]*domain.User, error)
 	GetUserByEmail(email string) (*domain.User, error)
+	UpdateUser(id, name, email string) error
 }

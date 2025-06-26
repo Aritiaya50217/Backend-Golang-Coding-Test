@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"time"
 
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	outbound "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
@@ -57,4 +58,21 @@ func (r *userMongoRepository) GetUserById(id string) (*domain.User, error) {
 
 	user.ID = objID
 	return &user, nil
+}
+
+func (r *userMongoRepository) UpdateUser(id, name, email string) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	update := bson.M{
+		"$set": bson.M{
+			"name":       name,
+			"email":      email,
+			"updated_at": now,
+		},
+	}
+	_, err = r.col.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+	return err
 }
