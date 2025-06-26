@@ -8,6 +8,7 @@ import (
 
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/config"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/inbound/http"
+	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/inbound/http/middleware"
 	outbound_mongo "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/mongo"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
 	outbound_security "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
@@ -43,7 +44,13 @@ func main() {
 	authHandler := http.NewAuthHandler(authService)
 
 	e := echo.New()
-	userHandler.RegisterRoutes(e)
+	// login
 	authHandler.RegisterRoutes(e)
+
+	// middleware
+	api := e.Group("/api")
+	api.Use(middleware.JWTMiddleware)
+	// router
+	userHandler.RegisterRoutes(api)
 	log.Fatal(e.Start(":8080"))
 }
