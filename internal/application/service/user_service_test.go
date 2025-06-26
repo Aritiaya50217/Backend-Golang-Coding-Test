@@ -108,3 +108,29 @@ func TestCreateUser_DuplicateEmail(t *testing.T) {
 	})
 	assert.Equal(t, err, "email already exists")
 }
+
+func TestGetUserByID_Success(t *testing.T) {
+	mockRepo := new(MockRepo)
+	mockHasher := new(MockHasher)
+
+	userService := &service.UserService{Repo: mockRepo, Hasher: mockHasher}
+
+	userID := "60b8d295f1a4e3e7d5a2b85f"
+	id, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		t.Fatalf("invalid ObjectID hex: %v", err)
+	}
+
+	mockRepo.On("GetUserById", mock.AnythingOfType("string")).Return(&domain.User{
+		ID:    id,
+		Name:  "John Doe",
+		Email: "john@example.com",
+	}, nil)
+
+	user, err := userService.GetUser(userID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, id, user.ID)
+
+	mockRepo.AssertExpectations(t)
+}
