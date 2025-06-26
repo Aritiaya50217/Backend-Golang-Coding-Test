@@ -182,3 +182,13 @@ func TestUpdateUser_Success(t *testing.T) {
 	err = service.UpdateUser(userID, "New Name", "new@example.com")
 	assert.NoError(t, err)
 }
+
+func TestDeleteUser_Success(t *testing.T) {
+	mockRepo := new(MockRepo)
+	service := &service.UserService{Repo: mockRepo}
+	userID := "60b8d295f1a4e3e7d5a2b85f"
+	mockRepo.On("DeleteUser", userID).Return(nil)
+
+	err := service.DeleteUser(userID)
+	assert.NoError(t, err)
+}
