@@ -13,6 +13,7 @@ import (
 
 type MockRepo struct{ mock.Mock }
 type MockHasher struct{ mock.Mock }
+type MockCollection struct{ mock.Mock }
 
 func (m *MockRepo) GetUserByEmail(email string) (*domain.User, error) {
 	args := m.Called(email)

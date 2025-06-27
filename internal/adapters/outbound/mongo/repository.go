@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	security "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	outbound "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,11 +14,38 @@ import (
 )
 
 type userMongoRepository struct {
-	col *mongo.Collection
+	col    *mongo.Collection
+	hasher outbound.PasswordHasher
 }
 
 func NewUserMongoRepository(c *mongo.Collection) outbound.UserRepository {
 	return &userMongoRepository{col: c}
+}
+
+func (r *userMongoRepository) InitDefaultUser() error {
+	count, err := r.col.CountDocuments(context.TODO(), bson.M{})
+	if err != nil {
+		return err
+	}
+	// hash
+	hashed, err := security.NewBcryptHasher().Hash("admin1234")
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		defaultUser := &domain.User{
+			ID:        primitive.NewObjectID(),
+			Name:      "Admin",
+			Email:     "admin@example.com",
+			Password:  hashed,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		_, err = r.col.InsertOne(context.Background(), defaultUser)
+		return err
+	}
+	return nil
 }
 
 func (r *userMongoRepository) Save(user *domain.User) error {

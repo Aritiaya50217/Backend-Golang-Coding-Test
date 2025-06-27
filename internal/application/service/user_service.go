@@ -1,12 +1,15 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"time"
 
+	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/inbound"
 	outbound "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserService struct {
@@ -64,4 +67,31 @@ func (s *UserService) DeleteUser(id string) error {
 func (s *UserService) CountUsers() error {
 	_, err := s.Repo.CountUsers()
 	return err
+}
+
+func (s *UserService) InitDefaultUser(ctx context.Context) error {
+	existing, err := s.Repo.GetUserByEmail("admin@example.com")
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		return nil
+	}
+
+	// hash
+	hashed, err := security.NewBcryptHasher().Hash("admin1234")
+	if err != nil {
+		return err
+	}
+
+	defaultUser := &domain.User{
+		ID:        primitive.NewObjectID(),
+		Name:      "Admin",
+		Email:     "admin@example.com",
+		Password:  hashed,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	return s.Repo.Save(defaultUser)
 }

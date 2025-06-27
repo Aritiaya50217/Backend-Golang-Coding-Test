@@ -44,7 +44,10 @@ func main() {
 
 	service.StartUserCountLogger(cont, userRepo)
 
-	// auth
+	// user default
+	if err := uerService.InitDefaultUser(ctx); err != nil {
+		log.Fatalf("failed to init default user: %v", err)
+	}
 	tokenGen := security.NewJWTToKenGenarator(secret)
 	authService := service.NewAuthService(userRepo, hash, tokenGen)
 	authHandler := http.NewAuthHandler(authService)
