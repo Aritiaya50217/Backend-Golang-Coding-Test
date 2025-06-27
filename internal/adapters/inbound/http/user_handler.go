@@ -17,7 +17,6 @@ func NewUserHandler(s inbound.UserService) *UserHandler {
 }
 
 func (h *UserHandler) RegisterRoutes(e *echo.Group) {
-	e.POST("/users", h.CreateUser)
 	e.GET("/user/:id", h.GetUser)
 	e.GET("/users", h.GetUsers)
 	e.PATCH("/user/:id", h.UpdateUser)

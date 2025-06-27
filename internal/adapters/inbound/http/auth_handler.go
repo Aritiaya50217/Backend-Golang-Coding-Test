@@ -26,13 +26,13 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{})
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err})
 	}
 
 	token, err := h.service.Login(req.Email, req.Password)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{})
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": err})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"token": token})
+	return c.JSON(http.StatusOK, echo.Map{"token": token})
 }

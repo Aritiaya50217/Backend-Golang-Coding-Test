@@ -14,7 +14,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			return c.JSON(http.StatusUnauthorized, map[string]string{})
+			return c.JSON(http.StatusUnauthorized, echo.Map{})
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
@@ -26,7 +26,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid token"})
+			return c.JSON(http.StatusUnauthorized, echo.Map{"error": "invalid token"})
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
