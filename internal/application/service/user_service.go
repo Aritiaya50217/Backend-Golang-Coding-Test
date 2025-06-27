@@ -13,20 +13,31 @@ import (
 )
 
 type UserService struct {
-	Repo   outbound.UserRepository
-	Hasher outbound.PasswordHasher
+	Repo      outbound.UserRepository
+	Hasher    outbound.PasswordHasher
+	Validator outbound.Validator
 }
 
-func NewUserService(r outbound.UserRepository, h outbound.PasswordHasher) inbound.UserService {
-	return &UserService{Repo: r, Hasher: h}
+func NewUserService(r outbound.UserRepository, h outbound.PasswordHasher, v outbound.Validator) inbound.UserService {
+	return &UserService{
+		Repo:      r,
+		Hasher:    h,
+		Validator: v,
+	}
 }
 
 func (s *UserService) CreateUser(user *domain.User) error {
+	// validate
+	if err := s.Validator.Validate(user); err != nil {
+		return err
+	}
+
 	// check email
 	existing, _ := s.Repo.GetUserByEmail(user.Email)
 	if existing != nil {
 		return errors.New("email already exists")
 	}
+
 	// hash
 	hashed, err := s.Hasher.Hash(user.Password)
 	if err != nil {

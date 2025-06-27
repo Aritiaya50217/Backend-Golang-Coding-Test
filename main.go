@@ -12,6 +12,7 @@ import (
 	outbound_mongo "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/mongo"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
 	outbound_security "github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/outbound/security"
+	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/adapters/validator"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/application/service"
 	"github.com/labstack/echo/v4"
 	mongo "go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +20,7 @@ import (
 )
 
 func main() {
+	// connect mongoDB
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.LoadMongoConfigFromEnv().URI))
@@ -35,7 +37,9 @@ func main() {
 
 	userRepo := outbound_mongo.NewUserMongoRepository(collection)
 	hash := outbound_security.NewBcryptHasher()
-	uerService := service.NewUserService(userRepo, hash)
+	validator := validator.NewValidator()
+
+	uerService := service.NewUserService(userRepo, hash, validator)
 	userHandler := http.NewUserHandler(uerService)
 
 	// logger
