@@ -10,5 +10,5 @@
     2. ทุก endpoint ที่ต้องการ auth ให้ใส่ Authorization: Bearer <your_token> แนบไปที่ Header
 
 ### 3.ตัวอย่างการเรียกใช้งาน API
-    link : 
+    link : https://documenter.getpostman.com/view/15178383/2sB2xFdmyx
 
