@@ -14,6 +14,7 @@ import (
 type MockRepo struct{ mock.Mock }
 type MockHasher struct{ mock.Mock }
 type MockCollection struct{ mock.Mock }
+type MockValidator struct{ mock.Mock }
 
 func (m *MockRepo) GetUserByEmail(email string) (*domain.User, error) {
 	args := m.Called(email)
@@ -65,11 +66,21 @@ func (m *MockHasher) Compare(hashedPassword, password string) bool {
 	return args.Bool(0)
 }
 
+func (m *MockValidator) Validate(i interface{}) error {
+	args := m.Called(i)
+	return args.Error(0)
+}
+
 func TestCreateUser_Success(t *testing.T) {
 	mockRepo := new(MockRepo)
 	mockHasher := new(MockHasher)
+	mockValidator := new(MockValidator)
 
-	userService := &service.UserService{Repo: mockRepo, Hasher: mockHasher}
+	userService := &service.UserService{
+		Repo:      mockRepo,
+		Hasher:    mockHasher,
+		Validator: mockValidator,
+	}
 
 	user := &domain.User{
 		Name:     "Test Create User",
@@ -78,6 +89,7 @@ func TestCreateUser_Success(t *testing.T) {
 	}
 
 	// ไม่มี user ซ้ำใน database
+	mockValidator.On("Validate", user).Return(nil)
 	mockRepo.On("GetUserByEmail", user.Email).Return(nil, nil)
 	mockHasher.On("Hash", user.Password).Return("hashed pass", nil)
 	mockRepo.On("Save", mock.AnythingOfType("*domain.User")).Return(nil)
@@ -88,6 +100,7 @@ func TestCreateUser_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "hashed pass", user.Password)
 
+	mockValidator.AssertExpectations(t)
 	mockRepo.AssertExpectations(t)
 	mockHasher.AssertExpectations(t)
 }
@@ -95,8 +108,17 @@ func TestCreateUser_Success(t *testing.T) {
 func BenchmarkCreateUser(b *testing.B) {
 	mockRepo := new(MockRepo)
 	mockHasher := new(MockHasher)
-	userService := &service.UserService{Repo: mockRepo, Hasher: mockHasher}
+	mockValidator := new(MockValidator)
+	userService := &service.UserService{
+		Repo:      mockRepo,
+		Hasher:    mockHasher,
+		Validator: mockValidator,
+	}
 
+	mockValidator.On("Validate", mock.MatchedBy(func(i interface{}) bool {
+		_, ok := i.(*domain.User)
+		return ok
+	})).Return(nil)
 	mockRepo.On("GetUserByEmail", mock.Anything).Return(nil, nil)
 	mockHasher.On("Hash", mock.Anything).Return("hashed-pass", nil)
 	mockRepo.On("Save", mock.AnythingOfType("*domain.User")).Return(nil)
