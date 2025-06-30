@@ -63,7 +63,7 @@ func main() {
 	// middleware
 	api := e.Group("/api")
 	// register
-	api.POST("/user", userHandler.CreateUser)
+	api.POST("/register", userHandler.Register)
 
 	// middleware
 	api.Use(middleware.JWTMiddleware)

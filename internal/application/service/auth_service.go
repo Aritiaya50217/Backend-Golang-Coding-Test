@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 
+	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/domain"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/inbound"
 	"github.com/Aritiaya50217/Backend-Golang-Coding-Test/internal/ports/outbound"
 )
@@ -37,4 +38,28 @@ func (s *authService) Login(email, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (s *authService) Authorize(userID, action string) (bool, error) {
+	user, err := s.userRepo.GetUserById(userID)
+	if err != nil {
+		return false, err
+	}
+	switch action {
+	case "create_user":
+		return user.Role == domain.RoleAdmin, nil
+	case "register":
+		return true, nil
+	default:
+		return false, nil
+	}
+}
+
+func (s *authService) CreateUser(email, password string) error {
+	user := &domain.User{
+		Email:    email,
+		Password: password,
+		Role:     domain.RoleUser,
+	}
+	return s.userRepo.CreateUser(user)
 }

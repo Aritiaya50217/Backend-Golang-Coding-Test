@@ -36,7 +36,7 @@ func (m *MockRepo) GetUsers() ([]*domain.User, error) {
 	return users, args.Error(1)
 }
 
-func (m *MockRepo) Save(user *domain.User) error {
+func (m *MockRepo) CreateUser(user *domain.User) error {
 	args := m.Called(user)
 	return args.Error(0)
 }

@@ -48,7 +48,7 @@ func (r *userMongoRepository) InitDefaultUser() error {
 	return nil
 }
 
-func (r *userMongoRepository) Save(user *domain.User) error {
+func (r *userMongoRepository) CreateUser(user *domain.User) error {
 	_, err := r.col.InsertOne(context.Background(), user)
 	return err
 }

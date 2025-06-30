@@ -43,12 +43,13 @@ func (s *UserService) CreateUser(user *domain.User) error {
 	if err != nil {
 		return err
 	}
+	user.Role = domain.RoleUser
 	user.Password = hashed
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 
 	// save to repository
-	return s.Repo.Save(user)
+	return s.Repo.CreateUser(user)
 }
 
 func (s *UserService) GetUser(id string) (*domain.User, error) {
@@ -104,5 +105,5 @@ func (s *UserService) InitDefaultUser(ctx context.Context) error {
 		UpdatedAt: time.Now(),
 	}
 
-	return s.Repo.Save(defaultUser)
+	return s.Repo.CreateUser(defaultUser)
 }

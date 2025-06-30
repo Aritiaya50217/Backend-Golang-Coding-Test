@@ -17,10 +17,25 @@ func NewUserHandler(s inbound.UserService) *UserHandler {
 }
 
 func (h *UserHandler) RegisterRoutes(e *echo.Group) {
+	e.POST("/create", h.CreateUser)
 	e.GET("/user/:id", h.GetUser)
 	e.GET("/users", h.GetUsers)
 	e.PATCH("/user/:id", h.UpdateUser)
 	e.DELETE("/user/:id", h.DeleteUser)
+}
+
+func (h *UserHandler) Register(c echo.Context) error {
+	var user domain.User
+
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid input"})
+	}
+
+	err := h.service.CreateUser(&user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+	}
+	return c.JSON(http.StatusCreated, user)
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
